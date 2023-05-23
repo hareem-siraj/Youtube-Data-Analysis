@@ -1,0 +1,4 @@
+SELECT a.title, a.category_id, b.snippet_title FROM "youtube-analysis-raw-db"."regions" a
+INNER JOIN "db_youtube_cleaned"."cleaned_statistics_reference_data" b 
+on a.category_id= b.id
+where a.partition_0 = 'ca';
