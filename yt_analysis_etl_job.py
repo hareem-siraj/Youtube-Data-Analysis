@@ -5,6 +5,8 @@ from pyspark.context import SparkContext
 from awsglue.context import GlueContext
 from awsglue.job import Job
 
+from awsglue.dynamicframe import DynamicFrame
+
 args = getResolvedOptions(sys.argv, ["JOB_NAME"])
 sc = SparkContext()
 glueContext = GlueContext(sc)
@@ -12,57 +14,35 @@ spark = glueContext.spark_session
 job = Job(glueContext)
 job.init(args["JOB_NAME"], args)
 
-# Script generated for node Amazon S3
-AmazonS3_node1684835899875 = glueContext.create_dynamic_frame.from_options(
-    format_options={
-        "quoteChar": '"',
-        "withHeader": True,
-        "separator": ",",
-        "optimizePerformance": False,
-    },
-    connection_type="s3",
-    format="csv",
-    connection_options={
-        "paths": ["s3://youtube-analysis-devv/youtube analysis project/regions/"],
-        "recurse": True,
-    },
-    transformation_ctx="AmazonS3_node1684835899875",
-)
 
-# Script generated for node Change Schema
-ChangeSchema_node1684835903024 = ApplyMapping.apply(
-    frame=AmazonS3_node1684835899875,
-    mappings=[
-        ("video_id", "string", "video_id", "string"),
-        ("trending_date", "string", "trending_date", "string"),
-        ("title", "string", "title", "string"),
-        ("channel_title", "string", "channel_title", "string"),
-        ("category_id", "string", "category_id", "string"),
-        ("publish_time", "string", "publish_time", "string"),
-        ("tags", "string", "tags", "string"),
-        ("views", "string", "views", "string"),
-        ("likes", "string", "likes", "string"),
-        ("dislikes", "string", "dislikes", "string"),
-        ("comment_count", "string", "comment_count", "string"),
-        ("thumbnail_link", "string", "thumbnail_link", "string"),
-        ("comments_disabled", "string", "comments_disabled", "string"),
-        ("ratings_disabled", "string", "ratings_disabled", "string"),
-        ("video_error_or_removed", "string", "video_error_or_removed", "string"),
-        ("description", "string", "description", "string"),
-    ],
-    transformation_ctx="ChangeSchema_node1684835903024",
-)
+predicate_pushdown = "partition_0 in ('ca','gb','us')"
 
-# Script generated for node Amazon S3
-AmazonS3_node1684835906757 = glueContext.write_dynamic_frame.from_options(
-    frame=ChangeSchema_node1684835903024,
-    connection_type="s3",
-    format="glueparquet",
-    connection_options={
-        "path": "s3://youtube-analysis-cleansed-data-devv/youtube analysis project/regions/",
-        "partitionKeys": [],
-    },
-    transformation_ctx="AmazonS3_node1684835906757",
-)
+datasource0 = glueContext.create_dynamic_frame.from_catalog(database = "youtube-analysis-raw-db", table_name = "regions", transformation_ctx = "datasource0", push_down_predicate = predicate_pushdown)
+
+## @type: ApplyMapping
+## @args: [mapping = [("video_id", "string", "video_id", "string"), ("trending_date", "string", "trending_date", "string"), ("title", "string", "title", "string"), ("channel_title", "string", "channel_title", "string"), ("category_id", "long", "category_id", "long"), ("publish_time", "string", "publish_time", "string"), ("tags", "string", "tags", "string"), ("views", "long", "views", "long"), ("likes", "long", "likes", "long"), ("dislikes", "long", "dislikes", "long"), ("comment_count", "long", "comment_count", "long"), ("thumbnail_link", "string", "thumbnail_link", "string"), ("comments_disabled", "boolean", "comments_disabled", "boolean"), ("ratings_disabled", "boolean", "ratings_disabled", "boolean"), ("video_error_or_removed", "boolean", "video_error_or_removed", "boolean"), ("description", "string", "description", "string"), ("region", "string", "region", "string")], transformation_ctx = "applymapping1"]
+## @return: applymapping1
+## @inputs: [frame = datasource0]
+applymapping1 = ApplyMapping.apply(frame = datasource0, mappings = [("video_id", "string", "video_id", "string"), ("trending_date", "string", "trending_date", "string"), ("title", "string", "title", "string"), ("channel_title", "string", "channel_title", "string"), ("category_id", "long", "category_id", "long"), ("publish_time", "string", "publish_time", "string"), ("tags", "string", "tags", "string"), ("views", "long", "views", "long"), ("likes", "long", "likes", "long"), ("dislikes", "long", "dislikes", "long"), ("comment_count", "long", "comment_count", "long"), ("thumbnail_link", "string", "thumbnail_link", "string"), ("comments_disabled", "boolean", "comments_disabled", "boolean"), ("ratings_disabled", "boolean", "ratings_disabled", "boolean"), ("video_error_or_removed", "boolean", "video_error_or_removed", "boolean"), ("description", "string", "description", "string"), ("region", "string", "region", "string")], transformation_ctx = "applymapping1")
+## @type: ResolveChoice
+## @args: [choice = "make_struct", transformation_ctx = "resolvechoice2"]
+## @return: resolvechoice2
+## @inputs: [frame = applymapping1]
+resolvechoice2 = ResolveChoice.apply(frame = applymapping1, choice = "make_struct", transformation_ctx = "resolvechoice2")
+## @type: DropNullFields
+## @args: [transformation_ctx = "dropnullfields3"]
+## @return: dropnullfields3
+## @inputs: [frame = resolvechoice2]
+dropnullfields3 = DropNullFields.apply(frame = resolvechoice2, transformation_ctx = "dropnullfields3")
+## @type: DataSink
+## @args: [connection_type = "s3", connection_options = {"path": "s3://bigdata-on-youtube-cleansed-euwest1-14317621-dev/youtube/raw_statistics/"}, format = "parquet", transformation_ctx = "datasink4"]
+## @return: datasink4
+## @inputs: [frame = dropnullfields3]
+
+
+datasink1 = dropnullfields3.toDF().coalesce(1)
+df_final_output = DynamicFrame.fromDF(datasink1, glueContext, "df_final_output")
+datasink4 = glueContext.write_dynamic_frame.from_options(frame = df_final_output, connection_type = "s3", connection_options = {"path": "s3://youtube-analysis-cleansed-data-devv/youtube analysis project/regions/", "partitionKeys": ["region"]}, format = "parquet", transformation_ctx = "datasink4")
+
 
 job.commit()
