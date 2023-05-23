@@ -13,12 +13,12 @@ In summary, this project endeavors to create a secure, streamlined, and analytic
 https://www.kaggle.com/datasets/datasnaek/youtube-new
 
 ## Project Goals
-1. Data Ingestion — Build a mechanism to ingest data from different sources
-2. ETL System — We are getting data in raw format, transforming this data into the proper format
-3. Data lake — We will be getting data from multiple sources so we need centralized repo to store them
-4. Scalability — As the size of our data increases, we need to make sure our system scales with it
-5. Cloud — We can’t process vast amounts of data on our local computer so we need to use the cloud, in this case, we will use AWS
-6. Reporting — Build a dashboard to get answers to the question we asked earlier
+1. Data Ingestion — Building a mechanism to ingest data from different sources
+2. ETL System — transforming raw format data into the proper format
+3. Data lake — centralizing repo to store data from multiple sources
+4. Scalability —  making sure the system scales with the increasing data size
+5. Cloud — processing vast amounts of data 
+6. Reporting — Building a dashboard to get answers to the questions asked 
 
 ## Services used
 - Amazon S3, AWS IAM, QuickSight, AWS Glue, AWS Lambda, AWS Athena
